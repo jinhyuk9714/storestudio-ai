@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { jsonError, parseJsonError } from "@/lib/api";
-import { productForAmount, grantCreditsForTossPayment } from "@/lib/server/billing";
+import {
+  productForAmount,
+  grantCreditsForTossPayment,
+  verifyTossWebhookPayment,
+  userIdFromOrderId
+} from "@/lib/server/billing";
 import { resolveRequestUser } from "@/lib/server/auth";
 import { mutateStore, readStore } from "@/lib/server/store";
 
@@ -13,24 +18,40 @@ const tossWebhookSchema = z.object({
   credits: z.number().int().positive().optional(),
   productId: z.literal("starter_30").optional(),
   userId: z.string().optional()
-});
+}).passthrough();
 
 export async function POST(request: Request) {
   try {
-    const raw = await request.json();
+    const rawText = await request.text();
+    const raw = JSON.parse(rawText);
     const body = tossWebhookSchema.parse(raw);
-    const user = body.userId
-      ? { id: body.userId }
-      : await userFromOrderId(body.orderId ?? null) ?? await resolveRequestUser(request);
-    const productId = body.productId ?? productForAmount(body.amount ?? 29000);
+    const verifiedPayment = await verifyTossWebhookPayment(raw);
+
+    if (verifiedPayment?.status && verifiedPayment.status !== "DONE") {
+      return NextResponse.json({
+        ignored: true,
+        reason: `PAYMENT_${verifiedPayment.status}`,
+        duplicate: false,
+        creditsGranted: 0
+      });
+    }
+
+    const paymentKey = verifiedPayment?.paymentKey ?? body.paymentKey ?? null;
+    const orderId = verifiedPayment?.orderId ?? body.orderId ?? null;
+    const amount = verifiedPayment?.amount ?? body.amount ?? 29000;
+    const user = await resolveWebhookUser(request, {
+      orderId,
+      userId: verifiedPayment ? userIdFromOrderId(orderId) : body.userId
+    });
+    const productId = body.productId ?? productForAmount(amount);
 
     const payload = await mutateStore((data) => {
       return grantCreditsForTossPayment(data, {
         userId: user.id,
-        paymentKey: body.paymentKey ?? null,
-        orderId: body.orderId ?? null,
+        paymentKey,
+        orderId,
         productId,
-        raw
+        raw: verifiedPayment?.raw ?? raw
       });
     });
 
@@ -41,14 +62,21 @@ export async function POST(request: Request) {
   }
 }
 
+async function resolveWebhookUser(
+  request: Request,
+  input: { orderId: string | null; userId?: string | null }
+): Promise<{ id: string }> {
+  if (input.userId) {
+    return { id: input.userId };
+  }
+  return await userFromOrderId(input.orderId) ?? await resolveRequestUser(request);
+}
+
 async function userFromOrderId(orderId: string | null): Promise<{ id: string } | null> {
-  if (!orderId?.startsWith("order_user_")) {
+  const userId = userIdFromOrderId(orderId);
+  if (!userId) {
     return null;
   }
-
-  const parts = orderId.split("_");
-  parts.pop();
-  const userId = parts.slice(1).join("_");
   const data = await readStore();
   return data.users.some((user) => user.id === userId) ? { id: userId } : null;
 }

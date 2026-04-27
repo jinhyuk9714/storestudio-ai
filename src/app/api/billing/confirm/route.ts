@@ -5,6 +5,7 @@ import { resolveRequestUser } from "@/lib/server/auth";
 import {
   confirmTossPayment,
   grantCreditsForTossPayment,
+  orderIdBelongsToUser,
   productForAmount
 } from "@/lib/server/billing";
 import { mutateStore } from "@/lib/server/store";
@@ -19,6 +20,10 @@ export async function POST(request: Request) {
   try {
     const body = confirmSchema.parse(await request.json());
     const user = await resolveRequestUser(request);
+    if (!orderIdBelongsToUser(body.orderId, user.id)) {
+      throw new Error("ORDER_USER_MISMATCH");
+    }
+
     const productId = productForAmount(body.amount);
     const raw = await confirmTossPayment(body);
     const payload = await mutateStore((data) =>
