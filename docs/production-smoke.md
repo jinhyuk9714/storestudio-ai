@@ -6,6 +6,7 @@ Run this checklist after every production deploy and before inviting a new beta 
 
 - Confirm Vercel deployment is on the expected `main` commit.
 - Confirm production env vars are set for Supabase, Cloudflare R2, Trigger.dev, Toss Payments, OpenAI, and admin access.
+- Call `GET /api/ops/health` with `Authorization: Bearer <ADMIN_TOKEN>` and confirm `productionReady` is `true`.
 - Keep Toss Payments in test mode until the live merchant review is complete.
 
 ## Core Flow

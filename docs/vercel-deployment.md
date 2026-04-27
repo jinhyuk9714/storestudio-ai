@@ -37,3 +37,12 @@ The following secret or account-specific values still need to be added in Vercel
 - `TOSS_SECRET_KEY`
 - `OPENAI_API_KEY`
 - `ADMIN_TOKEN`
+
+After adding secrets, call the admin-only readiness endpoint:
+
+```bash
+curl -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  https://beta-deploy-readiness.vercel.app/api/ops/health
+```
+
+The endpoint reports configured and missing variable names only. It never returns secret values.
