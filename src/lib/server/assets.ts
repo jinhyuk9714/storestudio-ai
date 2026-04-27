@@ -38,7 +38,10 @@ export async function saveUploadedImage(input: {
   height: number;
   buffer: Buffer;
 }> {
-  await ensureRuntimeDirs();
+  const storageDriver = selectStorageDriverName();
+  if (storageDriver === "local") {
+    await ensureRuntimeDirs();
+  }
   const buffer = bufferFromDataUrl(input.dataUrl);
   assertAllowedImage(input.mimeType, buffer.byteLength);
 
@@ -48,7 +51,6 @@ export async function saveUploadedImage(input: {
   const fileName = `${input.assetId}.${extension}`;
   const filePath = path.join(UPLOAD_DIR, fileName);
   const normalized = await image.toFormat(extension === "jpg" ? "jpeg" : extension).toBuffer();
-  const storageDriver = selectStorageDriverName();
 
   if (storageDriver === "r2") {
     const bucketKey = `uploads/${fileName}`;
@@ -103,7 +105,10 @@ export async function saveGeneratedImage(input: {
   storageDriver: "local" | "r2";
   format: "png";
 }> {
-  await ensureRuntimeDirs();
+  const storageDriver = selectStorageDriverName();
+  if (storageDriver === "local") {
+    await ensureRuntimeDirs();
+  }
   const preset = OUTPUT_PRESET_BY_ID[input.outputType];
   const composed = await composeSellerImage({
     base: input.buffer,
@@ -115,7 +120,6 @@ export async function saveGeneratedImage(input: {
     watermark: input.watermark
   });
   const fileName = `${input.assetId}.png`;
-  const storageDriver = selectStorageDriverName();
 
   if (storageDriver === "r2") {
     const bucketKey = `generated/${fileName}`;
