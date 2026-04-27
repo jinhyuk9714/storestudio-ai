@@ -34,6 +34,8 @@ The following secret or account-specific values have been added to Vercel produc
 - `R2_PUBLIC_BASE_URL`
 - `TRIGGER_SECRET_KEY`
 - `TRIGGER_GENERATION_TASK_URL`
+- `TOSS_SECRET_KEY`
+- `OPENAI_API_KEY`
 - `ADMIN_TOKEN`
 
 The current `TRIGGER_GENERATION_TASK_URL` points to the app-hosted production runner:
@@ -44,12 +46,7 @@ https://beta-deploy-readiness.vercel.app/api/jobs/generations/run
 
 That keeps beta job execution asynchronous without requiring a separate Trigger.dev project yet. If Trigger.dev is added later, replace this URL with the Trigger task endpoint and keep the same bearer-secret contract.
 
-The following values still need to be added in Vercel before full production smoke testing:
-
-- `TOSS_SECRET_KEY`
-- `OPENAI_API_KEY`
-
-After adding secrets, call the admin-only readiness endpoint:
+The admin-only readiness endpoint should report `productionReady: true`:
 
 ```bash
 curl -H "Authorization: Bearer <ADMIN_TOKEN>" \
