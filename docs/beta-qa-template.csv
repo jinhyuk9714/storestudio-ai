@@ -1,0 +1,4 @@
+sample_id,date,category,product_name,source_image_count,output_type,decision,downloaded,notes
+sample-001,2026-04-27,화장품,비건 립밤,1,white-background,그대로 업로드 가능,true,
+sample-001,2026-04-27,화장품,비건 립밤,1,square-thumbnail,수정 필요,false,
+sample-001,2026-04-27,화장품,비건 립밤,1,lifestyle,사용 불가,false,
