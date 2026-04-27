@@ -1,0 +1,13 @@
+.next
+node_modules
+coverage
+.env
+.env.local
+.data
+public/uploads
+public/generated
+*.log
+.playwright-mcp
+storestudio-smoke.png
+storestudio-mobile-smoke.png
+tsconfig.tsbuildinfo
