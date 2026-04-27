@@ -12,3 +12,6 @@ storestudio-smoke.png
 storestudio-mobile-smoke.png
 tsconfig.tsbuildinfo
 .vercel
+.env*.local
+supabase/.temp/
+cloudflare-r2-overview.png

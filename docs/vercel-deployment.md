@@ -22,7 +22,7 @@ The following non-secret values have been added to Vercel production and preview
 - `MAX_CONCURRENT_JOBS_PER_USER=2`
 - `ADMIN_UI_ENABLED=false`
 
-The following secret or account-specific values still need to be added in Vercel before production smoke testing:
+The following secret or account-specific values have been added to Vercel production and preview environments:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
@@ -34,9 +34,20 @@ The following secret or account-specific values still need to be added in Vercel
 - `R2_PUBLIC_BASE_URL`
 - `TRIGGER_SECRET_KEY`
 - `TRIGGER_GENERATION_TASK_URL`
+- `ADMIN_TOKEN`
+
+The current `TRIGGER_GENERATION_TASK_URL` points to the app-hosted production runner:
+
+```text
+https://beta-deploy-readiness.vercel.app/api/jobs/generations/run
+```
+
+That keeps beta job execution asynchronous without requiring a separate Trigger.dev project yet. If Trigger.dev is added later, replace this URL with the Trigger task endpoint and keep the same bearer-secret contract.
+
+The following values still need to be added in Vercel before full production smoke testing:
+
 - `TOSS_SECRET_KEY`
 - `OPENAI_API_KEY`
-- `ADMIN_TOKEN`
 
 After adding secrets, call the admin-only readiness endpoint:
 

@@ -88,3 +88,11 @@ create index if not exists projects_user_id_idx on public.projects(user_id);
 create index if not exists assets_project_id_idx on public.assets(project_id);
 create index if not exists generation_jobs_user_status_idx on public.generation_jobs(user_id, status);
 create index if not exists credit_ledger_user_id_idx on public.credit_ledger(user_id);
+
+alter table public.users enable row level security;
+alter table public.projects enable row level security;
+alter table public.assets enable row level security;
+alter table public.generation_jobs enable row level security;
+alter table public.credit_ledger enable row level security;
+alter table public.billing_events enable row level security;
+alter table public.waitlist enable row level security;
